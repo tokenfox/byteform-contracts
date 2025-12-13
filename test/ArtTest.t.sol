@@ -10,8 +10,7 @@ import {Byteform} from "../src/Byteform.sol";
 import {MockFileStore} from "./mocks/MockFileStore.sol";
 
 contract ArtTest is Test {
-    address public constant FILE_STORE =
-        0xFe1411d6864592549AdE050215482e4385dFa0FB;
+    address public constant FILE_STORE = 0xFe1411d6864592549AdE050215482e4385dFa0FB;
 
     /// @notice Deploy mock FileStore to the expected address using vm.etch
     function _deployMockFileStore() internal {
@@ -24,9 +23,7 @@ contract ArtTest is Test {
     Byteform public byteform;
     address public deployer;
 
-    function _getNumNullWallets(
-        uint256 numWallets
-    ) internal pure returns (uint256) {
+    function _getNumNullWallets(uint256 numWallets) internal pure returns (uint256) {
         if (numWallets == 2 || numWallets == 5 || numWallets == 25) {
             return 5;
         } else if (numWallets == 50) {
@@ -47,12 +44,7 @@ contract ArtTest is Test {
         renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
-        byteform = new Byteform(
-            deployer,
-            address(byteContract),
-            address(formContract),
-            address(renderer)
-        );
+        byteform = new Byteform(deployer, address(byteContract), address(formContract), address(renderer));
 
         // Get number of null wallets for this test case
         uint256 numNullWallets = _getNumNullWallets(numWallets);
@@ -64,15 +56,7 @@ contract ArtTest is Test {
         // Add unique wallets to the array
         for (uint256 i = 0; i < numWallets; i++) {
             // Generate a deterministic unique address for each wallet
-            address wallet = address(
-                uint160(
-                    uint256(
-                        keccak256(
-                            abi.encodePacked("ArtTestWallet", numWallets, i)
-                        )
-                    )
-                )
-            );
+            address wallet = address(uint160(uint256(keccak256(abi.encodePacked("ArtTestWallet", numWallets, i)))));
             allWallets[i] = wallet;
         }
 
@@ -85,9 +69,7 @@ contract ArtTest is Test {
         // Using deterministic selection based on hash for reproducibility
         for (uint256 i = 0; i < 256; i++) {
             // Use hash to determine which wallet index to use
-            bytes32 hash = keccak256(
-                abi.encodePacked("ArtTest", numWallets, i)
-            );
+            bytes32 hash = keccak256(abi.encodePacked("ArtTest", numWallets, i));
             uint256 walletIndex = uint256(hash) % totalWallets;
 
             // Get the wallet address from the array
@@ -112,21 +94,12 @@ contract ArtTest is Test {
         renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
-        byteform = new Byteform(
-            deployer,
-            address(byteContract),
-            address(formContract),
-            address(renderer)
-        );
+        byteform = new Byteform(deployer, address(byteContract), address(formContract), address(renderer));
 
         // Create 256 unique wallets, one for each byte value
         for (uint256 i = 0; i < 256; i++) {
             // Generate a deterministic unique address for each wallet
-            address wallet = address(
-                uint160(
-                    uint256(keccak256(abi.encodePacked("ArtTestAllWallet", i)))
-                )
-            );
+            address wallet = address(uint160(uint256(keccak256(abi.encodePacked("ArtTestAllWallet", i)))));
 
             // Claim byte i with wallet i
             vm.prank(wallet);
@@ -152,12 +125,7 @@ contract ArtTest is Test {
         renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
-        byteform = new Byteform(
-            deployer,
-            address(byteContract),
-            address(formContract),
-            address(renderer)
-        );
+        byteform = new Byteform(deployer, address(byteContract), address(formContract), address(renderer));
 
         // Claim all bytes
         for (uint256 i = 0; i < 256; i++) {
@@ -180,24 +148,10 @@ contract ArtTest is Test {
         renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
-        byteform = new Byteform(
-            deployer,
-            address(byteContract),
-            address(formContract),
-            address(renderer)
-        );
+        byteform = new Byteform(deployer, address(byteContract), address(formContract), address(renderer));
 
         // "Byteform" in hex: 42 79 74 65 66 6f 72 6d
-        uint8[8] memory formValues = [
-            uint8(0x42),
-            0x79,
-            0x74,
-            0x65,
-            0x66,
-            0x6f,
-            0x72,
-            0x6d
-        ];
+        uint8[8] memory formValues = [uint8(0x42), 0x79, 0x74, 0x65, 0x66, 0x6f, 0x72, 0x6d];
 
         // Create 8 unique wallets for bytes 0-7, each with corresponding form value
         for (uint256 i = 0; i < 8; i++) {
@@ -232,12 +186,7 @@ contract ArtTest is Test {
         renderer = new ByteformRenderer();
 
         // Deploy Byteform with null byteContract and formContract
-        byteform = new Byteform(
-            deployer,
-            address(0),
-            address(0),
-            address(renderer)
-        );
+        byteform = new Byteform(deployer, address(0), address(0), address(renderer));
     }
 
     function _testTokenURI(uint256 numWallets) internal {
@@ -251,25 +200,15 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "data:application/json;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            uriBytes.length,
-            prefixBytes.length,
-            "tokenURI should be long enough"
-        );
+        assertGe(uriBytes.length, prefixBytes.length, "tokenURI should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                uriBytes[i],
-                prefixBytes[i],
-                "tokenURI should start with data:application/json;base64,"
-            );
+            assertEq(uriBytes[i], prefixBytes[i], "tokenURI should start with data:application/json;base64,");
         }
 
         // Write the result to generated/{numWallets}.txt
-        string memory filename = string(
-            abi.encodePacked("generated/", vm.toString(numWallets), ".txt")
-        );
+        string memory filename = string(abi.encodePacked("generated/", vm.toString(numWallets), ".txt"));
         vm.writeFile(filename, tokenURI);
     }
 
@@ -284,29 +223,15 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "data:image/svg+xml;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            uriBytes.length,
-            prefixBytes.length,
-            "tokenImageURI should be long enough"
-        );
+        assertGe(uriBytes.length, prefixBytes.length, "tokenImageURI should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                uriBytes[i],
-                prefixBytes[i],
-                "tokenImageURI should start with data:image/svg+xml;base64,"
-            );
+            assertEq(uriBytes[i], prefixBytes[i], "tokenImageURI should start with data:image/svg+xml;base64,");
         }
 
         // Write the result to generated/{numWallets}-image.txt
-        string memory filename = string(
-            abi.encodePacked(
-                "generated/",
-                vm.toString(numWallets),
-                "-image.txt"
-            )
-        );
+        string memory filename = string(abi.encodePacked("generated/", vm.toString(numWallets), "-image.txt"));
         vm.writeFile(filename, tokenImageURI);
     }
 
@@ -321,25 +246,15 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "<!DOCTYPE html>";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            htmlBytes.length,
-            prefixBytes.length,
-            "tokenHTML should be long enough"
-        );
+        assertGe(htmlBytes.length, prefixBytes.length, "tokenHTML should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                htmlBytes[i],
-                prefixBytes[i],
-                "tokenHTML should start with <!DOCTYPE html>"
-            );
+            assertEq(htmlBytes[i], prefixBytes[i], "tokenHTML should start with <!DOCTYPE html>");
         }
 
         // Write the result to generated/{numWallets}.html
-        string memory filename = string(
-            abi.encodePacked("generated/", vm.toString(numWallets), ".html")
-        );
+        string memory filename = string(abi.encodePacked("generated/", vm.toString(numWallets), ".html"));
         vm.writeFile(filename, tokenHTML);
     }
 
@@ -433,11 +348,7 @@ contract ArtTest is Test {
         uint256 gasUsed = gasBefore - gasleft();
 
         // Assert gas usage does not exceed limit
-        assertLe(
-            gasUsed,
-            29_000_000,
-            "tokenURI gas usage should not exceed 30M"
-        );
+        assertLe(gasUsed, 29_000_000, "tokenURI gas usage should not exceed 30M");
 
         // Verify the tokenURI is valid (starts with data:application/json;base64,)
         bytes memory uriBytes = bytes(tokenURI);
@@ -448,19 +359,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "data:application/json;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            uriBytes.length,
-            prefixBytes.length,
-            "tokenURI should be long enough"
-        );
+        assertGe(uriBytes.length, prefixBytes.length, "tokenURI should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                uriBytes[i],
-                prefixBytes[i],
-                "tokenURI should start with data:application/json;base64,"
-            );
+            assertEq(uriBytes[i], prefixBytes[i], "tokenURI should start with data:application/json;base64,");
         }
 
         // Write the result to generated/all.txt
@@ -477,18 +380,10 @@ contract ArtTest is Test {
         uint256 gasUsed = gasBefore - gasleft();
 
         // Ensure gas usage does not exceed known limits
-        assertLe(
-            gasUsed,
-            29_000_000,
-            "tokenURI gas usage should not exceed 30M"
-        );
+        assertLe(gasUsed, 29_000_000, "tokenURI gas usage should not exceed 30M");
 
         // tokenURI must remain below known size limits (etherscan, etc.)
-        assertLe(
-            bytes(tokenURI).length,
-            99 * 1024,
-            "tokenURI payload size must not exceed 100 kB"
-        );
+        assertLe(bytes(tokenURI).length, 99 * 1024, "tokenURI payload size must not exceed 100 kB");
 
         // Write the result to generated/worst-case.txt
         vm.writeFile("generated/worst-case.txt", tokenURI);
@@ -507,19 +402,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "data:image/svg+xml;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            uriBytes.length,
-            prefixBytes.length,
-            "tokenImageURI should be long enough"
-        );
+        assertGe(uriBytes.length, prefixBytes.length, "tokenImageURI should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                uriBytes[i],
-                prefixBytes[i],
-                "tokenImageURI should start with data:image/svg+xml;base64,"
-            );
+            assertEq(uriBytes[i], prefixBytes[i], "tokenImageURI should start with data:image/svg+xml;base64,");
         }
 
         // Write the result to generated/all-image.txt
@@ -535,11 +422,7 @@ contract ArtTest is Test {
         uint256 gasUsed = gasBefore - gasleft();
 
         // Assert gas usage does not exceed limit
-        assertLe(
-            gasUsed,
-            29_000_000,
-            "tokenHTML gas usage should not exceed 30M"
-        );
+        assertLe(gasUsed, 29_000_000, "tokenHTML gas usage should not exceed 30M");
 
         // Verify the tokenHTML is valid (starts with <!DOCTYPE html>)
         bytes memory htmlBytes = bytes(tokenHTML);
@@ -548,19 +431,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "<!DOCTYPE html>";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            htmlBytes.length,
-            prefixBytes.length,
-            "tokenHTML should be long enough"
-        );
+        assertGe(htmlBytes.length, prefixBytes.length, "tokenHTML should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                htmlBytes[i],
-                prefixBytes[i],
-                "tokenHTML should start with <!DOCTYPE html>"
-            );
+            assertEq(htmlBytes[i], prefixBytes[i], "tokenHTML should start with <!DOCTYPE html>");
         }
 
         // Write the result to generated/all.html
@@ -581,19 +456,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "data:application/json;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            uriBytes.length,
-            prefixBytes.length,
-            "tokenURI should be long enough"
-        );
+        assertGe(uriBytes.length, prefixBytes.length, "tokenURI should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                uriBytes[i],
-                prefixBytes[i],
-                "tokenURI should start with data:application/json;base64,"
-            );
+            assertEq(uriBytes[i], prefixBytes[i], "tokenURI should start with data:application/json;base64,");
         }
 
         // Write the result to generated/byteform.txt
@@ -613,19 +480,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "data:image/svg+xml;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            uriBytes.length,
-            prefixBytes.length,
-            "tokenImageURI should be long enough"
-        );
+        assertGe(uriBytes.length, prefixBytes.length, "tokenImageURI should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                uriBytes[i],
-                prefixBytes[i],
-                "tokenImageURI should start with data:image/svg+xml;base64,"
-            );
+            assertEq(uriBytes[i], prefixBytes[i], "tokenImageURI should start with data:image/svg+xml;base64,");
         }
 
         // Write the result to generated/byteform-image.txt
@@ -645,19 +504,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "<!DOCTYPE html>";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            htmlBytes.length,
-            prefixBytes.length,
-            "tokenHTML should be long enough"
-        );
+        assertGe(htmlBytes.length, prefixBytes.length, "tokenHTML should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                htmlBytes[i],
-                prefixBytes[i],
-                "tokenHTML should start with <!DOCTYPE html>"
-            );
+            assertEq(htmlBytes[i], prefixBytes[i], "tokenHTML should start with <!DOCTYPE html>");
         }
 
         // Write the result to generated/byteform.html
@@ -678,19 +529,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "data:application/json;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            uriBytes.length,
-            prefixBytes.length,
-            "tokenURI should be long enough"
-        );
+        assertGe(uriBytes.length, prefixBytes.length, "tokenURI should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                uriBytes[i],
-                prefixBytes[i],
-                "tokenURI should start with data:application/json;base64,"
-            );
+            assertEq(uriBytes[i], prefixBytes[i], "tokenURI should start with data:application/json;base64,");
         }
 
         // Write the result to generated/unrevealed.txt
@@ -710,19 +553,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "data:image/svg+xml;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            uriBytes.length,
-            prefixBytes.length,
-            "tokenImageURI should be long enough"
-        );
+        assertGe(uriBytes.length, prefixBytes.length, "tokenImageURI should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                uriBytes[i],
-                prefixBytes[i],
-                "tokenImageURI should start with data:image/svg+xml;base64,"
-            );
+            assertEq(uriBytes[i], prefixBytes[i], "tokenImageURI should start with data:image/svg+xml;base64,");
         }
 
         // Write the result to generated/unrevealed-image.txt
@@ -742,19 +577,11 @@ contract ArtTest is Test {
         // Check that it starts with the expected prefix
         string memory prefix = "<!DOCTYPE html>";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(
-            htmlBytes.length,
-            prefixBytes.length,
-            "tokenHTML should be long enough"
-        );
+        assertGe(htmlBytes.length, prefixBytes.length, "tokenHTML should be long enough");
 
         // Verify prefix matches
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(
-                htmlBytes[i],
-                prefixBytes[i],
-                "tokenHTML should start with <!DOCTYPE html>"
-            );
+            assertEq(htmlBytes[i], prefixBytes[i], "tokenHTML should start with <!DOCTYPE html>");
         }
 
         // Write the result to generated/unrevealed.html
