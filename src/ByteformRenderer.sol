@@ -251,7 +251,7 @@ contract ByteformRenderer {
             "<style>.m{width:256px;height:256px}",
             ".g{box-sizing:border-box;width:256px;height:256px;line-height:16px;",
             "display:grid;grid-template-columns:repeat(16,16px);grid-template-rows:repeat(16,16px)}",
-            ".g p{margin:0;text-align:center;color:#000;font-family:Byteform,serif,monospace;font-weight:400;font-size:16px;line-height:16px;}</style>"
+            ".g p{margin:0;text-align:center;color:#000;font-family:Byteform,cursive,sans-serif;font-weight:400;font-size:16px;line-height:16px;}</style>"
         );
 
         bytes memory offset = bytes(Strings.toString(MARGIN_SIZE));
