@@ -17,16 +17,24 @@ interface IByteform {
 }
 
 contract DeployScript is Script {
+    address public constant FILE_STORE =
+        0xFe1411d6864592549AdE050215482e4385dFa0FB;
+
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
         // Deploy ByteformRenderer
-        ByteformRenderer renderer = new ByteformRenderer();
+        ByteformRenderer renderer = new ByteformRenderer(FILE_STORE);
 
         // Deploy Byteform
         address deployer = vm.addr(deployerPrivateKey);
-        Byteform byteform = new Byteform(deployer, address(0), address(0), address(renderer));
+        Byteform byteform = new Byteform(
+            deployer,
+            address(0),
+            address(0),
+            address(renderer)
+        );
 
         // Create byte
         Byte byteContract = new Byte();
@@ -41,7 +49,7 @@ contract DeployScript is Script {
 
         /*
         // Optional: Upgrade renderer
-        ByteformRenderer rendererV2 = new ByteformRenderer();
+        ByteformRenderer rendererV2 = new ByteformRenderer(FILE_STORE);
         byteformInterface.setRenderer(address(rendererV2));
 
         // Optional: freeze byte and form

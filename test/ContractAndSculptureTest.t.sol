@@ -7,14 +7,21 @@ import {Form} from "../src/Form.sol";
 import {ByteformRenderer} from "../src/ByteformRenderer.sol";
 import {Byteform} from "../src/Byteform.sol";
 import {MockFileStore} from "./mocks/MockFileStore.sol";
-import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import {
+    IERC721Enumerable
+} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import {
+    IERC721Metadata
+} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IERC5313} from "@openzeppelin/contracts/interfaces/IERC5313.sol";
 import {IERC7572} from "../src/IERC7572.sol";
 
 contract ContractAndSculptureTest is Test {
+    address public constant FILE_STORE =
+        0xFe1411d6864592549AdE050215482e4385dFa0FB;
+
     Byte public byteContract;
     Form public formContract;
     ByteformRenderer public renderer;
@@ -23,9 +30,8 @@ contract ContractAndSculptureTest is Test {
 
     /// @notice Deploy mock FileStore to the expected address using vm.etch
     function _deployMockFileStore() internal {
-        address fileStoreAddress = 0xFe1411d6864592549AdE050215482e4385dFa0FB;
         MockFileStore mockFileStore = new MockFileStore();
-        vm.etch(fileStoreAddress, address(mockFileStore).code);
+        vm.etch(FILE_STORE, address(mockFileStore).code);
     }
 
     function setUp() public {
@@ -37,13 +43,27 @@ contract ContractAndSculptureTest is Test {
         formContract = new Form();
 
         // Deploy ByteformRenderer (uses mock FileStore)
-        renderer = new ByteformRenderer();
+        renderer = new ByteformRenderer(FILE_STORE);
 
         // Deploy Byteform that connects everything
-        byteform = new Byteform(deployer, address(byteContract), address(formContract), address(renderer));
+        byteform = new Byteform(
+            deployer,
+            address(byteContract),
+            address(formContract),
+            address(renderer)
+        );
 
         // Set up some test data - "Byteform" in hex: 42 79 74 65 66 6f 72 6d
-        uint8[8] memory formValues = [uint8(0x42), 0x79, 0x74, 0x65, 0x66, 0x6f, 0x72, 0x6d];
+        uint8[8] memory formValues = [
+            uint8(0x42),
+            0x79,
+            0x74,
+            0x65,
+            0x66,
+            0x6f,
+            0x72,
+            0x6d
+        ];
 
         // Create 8 unique wallets for bytes 0-7, each with corresponding form value
         for (uint256 i = 0; i < 8; i++) {
@@ -75,10 +95,18 @@ contract ContractAndSculptureTest is Test {
         // Verify starts with data:application/json;base64,
         string memory prefix = "data:application/json;base64,";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(uriBytes.length, prefixBytes.length, "contractURI should be long enough");
+        assertGe(
+            uriBytes.length,
+            prefixBytes.length,
+            "contractURI should be long enough"
+        );
 
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(uriBytes[i], prefixBytes[i], "contractURI should start with data:application/json;base64,");
+            assertEq(
+                uriBytes[i],
+                prefixBytes[i],
+                "contractURI should start with data:application/json;base64,"
+            );
         }
 
         // Write to file
@@ -95,10 +123,18 @@ contract ContractAndSculptureTest is Test {
         // Verify starts with <!DOCTYPE html>
         string memory prefix = "<!DOCTYPE html>";
         bytes memory prefixBytes = bytes(prefix);
-        assertGe(htmlBytes.length, prefixBytes.length, "index should be long enough");
+        assertGe(
+            htmlBytes.length,
+            prefixBytes.length,
+            "index should be long enough"
+        );
 
         for (uint256 i = 0; i < prefixBytes.length; i++) {
-            assertEq(htmlBytes[i], prefixBytes[i], "index should start with <!DOCTYPE html>");
+            assertEq(
+                htmlBytes[i],
+                prefixBytes[i],
+                "index should start with <!DOCTYPE html>"
+            );
         }
 
         // Write to file
@@ -123,7 +159,11 @@ contract ContractAndSculptureTest is Test {
         assertGt(textBytes.length, 0, "text should not be empty");
 
         // Verify text is "Byteform" (from our setup)
-        assertEq(textStr, "Byteform", "text should be 'Byteform' based on setup");
+        assertEq(
+            textStr,
+            "Byteform",
+            "text should be 'Byteform' based on setup"
+        );
 
         // Write to file
         vm.writeFile("generated/text.txt", textStr);
@@ -153,9 +193,21 @@ contract ContractAndSculptureTest is Test {
 
         // Verify array has 3 elements: byteContract, formContract, renderer
         assertEq(addressesArr.length, 3, "addresses should have 3 elements");
-        assertEq(addressesArr[0], address(byteContract), "addresses[0] should be byteContract");
-        assertEq(addressesArr[1], address(formContract), "addresses[1] should be formContract");
-        assertEq(addressesArr[2], address(renderer), "addresses[2] should be renderer");
+        assertEq(
+            addressesArr[0],
+            address(byteContract),
+            "addresses[0] should be byteContract"
+        );
+        assertEq(
+            addressesArr[1],
+            address(formContract),
+            "addresses[1] should be formContract"
+        );
+        assertEq(
+            addressesArr[2],
+            address(renderer),
+            "addresses[2] should be renderer"
+        );
 
         // Write to file - format as JSON array with hex addresses
         string memory addressesStr = "[";
@@ -163,7 +215,14 @@ contract ContractAndSculptureTest is Test {
             if (i > 0) {
                 addressesStr = string(abi.encodePacked(addressesStr, ","));
             }
-            addressesStr = string(abi.encodePacked(addressesStr, '"', vm.toString(addressesArr[i]), '"'));
+            addressesStr = string(
+                abi.encodePacked(
+                    addressesStr,
+                    '"',
+                    vm.toString(addressesArr[i]),
+                    '"'
+                )
+            );
         }
         addressesStr = string(abi.encodePacked(addressesStr, "]"));
 
@@ -183,7 +242,9 @@ contract ContractAndSculptureTest is Test {
             if (i > 0) {
                 authorsStr = string(abi.encodePacked(authorsStr, ","));
             }
-            authorsStr = string(abi.encodePacked(authorsStr, '"', authorsArr[i], '"'));
+            authorsStr = string(
+                abi.encodePacked(authorsStr, '"', authorsArr[i], '"')
+            );
         }
         authorsStr = string(abi.encodePacked(authorsStr, "]"));
 
@@ -196,12 +257,20 @@ contract ContractAndSculptureTest is Test {
         // Verify first 8 bytes are owned by wallets 1-8
         for (uint256 i = 0; i < 8; i++) {
             address expectedOwner = address(uint160(i + 1));
-            assertEq(owners[i], expectedOwner, "byteOwners should return correct owner for claimed bytes");
+            assertEq(
+                owners[i],
+                expectedOwner,
+                "byteOwners should return correct owner for claimed bytes"
+            );
         }
 
         // Verify remaining bytes (8-255) are owned by address(0) since we pranked as address(0)
         for (uint256 i = 8; i < 256; i++) {
-            assertEq(owners[i], address(0), "byteOwners should return address(0) for bytes claimed by address(0)");
+            assertEq(
+                owners[i],
+                address(0),
+                "byteOwners should return address(0) for bytes claimed by address(0)"
+            );
         }
     }
 
@@ -229,11 +298,15 @@ contract ContractAndSculptureTest is Test {
     }
 
     function testByteformSupportsERC721EnumerableInterface() public view {
-        assertTrue(byteform.supportsInterface(type(IERC721Enumerable).interfaceId));
+        assertTrue(
+            byteform.supportsInterface(type(IERC721Enumerable).interfaceId)
+        );
     }
 
     function testByteformSupportsERC721MetadataInterface() public view {
-        assertTrue(byteform.supportsInterface(type(IERC721Metadata).interfaceId));
+        assertTrue(
+            byteform.supportsInterface(type(IERC721Metadata).interfaceId)
+        );
     }
 
     function testByteformSupportsOwnableInterface() public view {
@@ -259,4 +332,3 @@ contract ContractAndSculptureTest is Test {
         assertTrue(byteform.supportsInterface(bytes4(0x49064906)));
     }
 }
-

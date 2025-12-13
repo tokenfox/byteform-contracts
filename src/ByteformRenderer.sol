@@ -12,8 +12,11 @@ import {console} from "forge-std/console.sol";
 contract ByteformRenderer {
     using DynamicBufferLib for DynamicBufferLib.DynamicBuffer;
 
-    address public constant FILE_STORE =
-        0xFe1411d6864592549AdE050215482e4385dFa0FB;
+    address public immutable FILE_STORE;
+
+    constructor(address fileStore_) {
+        FILE_STORE = fileStore_;
+    }
 
     uint256 private constant MARGIN_SIZE = 16;
     uint256 private constant CELL_SIZE = 16;
@@ -267,7 +270,7 @@ contract ByteformRenderer {
         return
             string.concat(
                 "data:font/woff2;base64,",
-                IFileStore(FILE_STORE).readFile("IBMPlexMono-Regular.woff2")
+                IFileStore(FILE_STORE).readFile("Byteform.woff2")
             );
     }
 
