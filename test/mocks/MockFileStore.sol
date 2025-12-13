@@ -9,6 +9,7 @@ contract MockFileStore {
     Vm private constant vm =
         Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    // Make sure to add read access to allowlisted asset path in `foundry.toml`
     string public constant ASSET_PATH = "assets/";
 
     function readFile(
