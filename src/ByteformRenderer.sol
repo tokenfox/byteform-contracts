@@ -66,7 +66,7 @@ contract ByteformRenderer {
         address formContract
     ) external view returns (string memory) {
         string memory base64Image = Base64.encode(
-            _generateImage(byteContract, formContract)
+            _generateImage(byteContract, formContract, true, true)
         );
         return string.concat("data:image/svg+xml;base64,", base64Image);
     }
@@ -79,7 +79,7 @@ contract ByteformRenderer {
             string(
                 abi.encodePacked(
                     '<?xml version="1.0" encoding="UTF-8"?>\n',
-                    _generateImage(byteContract, formContract)
+                    _generateImage(byteContract, formContract, true, true)
                 )
             );
     }
@@ -111,7 +111,9 @@ contract ByteformRenderer {
                 '{"name":"Byteform","description":"',
                 _generateDescription(byteContract, formContract),
                 '","image":"data:image/svg+xml;base64,',
-                Base64.encode(_generateImage(byteContract, formContract)),
+                Base64.encode(
+                    _generateImage(byteContract, formContract, false, false)
+                ),
                 '","animation_url":"data:text/html;base64,',
                 Base64.encode(_generateHtml(byteContract, formContract)),
                 '"}'
@@ -127,7 +129,7 @@ contract ByteformRenderer {
                 '<!DOCTYPE html><html><head><meta charset="UTF-8">',
                 '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Byteform</title>',
                 "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:transparent}body{display:flex;align-items:center;justify-content:center;user-select:none}svg{max-width:100%;max-height:100%;width:auto;height:auto;cursor:pointer}</style></head><body>",
-                _generateImage(byteContract, formContract),
+                _generateImage(byteContract, formContract, true, true),
                 "<script>document.body.onclick=()=>{document.querySelector('.text').classList.toggle('hidden');document.querySelector('.traces').classList.toggle('hidden')}</script>",
                 "</body></html>"
             );
@@ -135,7 +137,9 @@ contract ByteformRenderer {
 
     function _generateImage(
         address byteContract,
-        address formContract
+        address formContract,
+        bool includeLines,
+        bool includeTextOverlay
     ) internal view returns (bytes memory) {
         if (byteContract == address(0) || formContract == address(0)) {
             return abi.encodePacked(SVG_OPEN, _generateCanvas(), SVG_CLOSE);
@@ -150,13 +154,13 @@ contract ByteformRenderer {
             abi.encodePacked(
                 SVG_OPEN,
                 "<style>.text,.traces{opacity:1;visibility:visible;transition:opacity 0.5s ease-in-out,visibility 0.5s ease-in-out}.hidden{opacity:0;visibility:hidden;pointer-events:none}.ps{stroke:#333333;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round}",
-                _generateFontFace(),
-                _generateLineStyles(),
-                _generateTextOverlayStyles(),
+                includeTextOverlay ? _generateFontFace() : bytes(""),
+                includeLines ? _generateLineStyles() : bytes(""),
+                includeTextOverlay ? _generateTextOverlayStyles() : bytes(""),
                 "</style>",
                 _generateCanvas(),
-                _generateLines(),
-                _generateTextOverlay(forms),
+                includeLines ? _generateLines() : bytes(""),
+                includeTextOverlay ? _generateTextOverlay(forms) : bytes(""),
                 _generateTraces(forms),
                 SVG_CLOSE
             );
@@ -273,7 +277,7 @@ contract ByteformRenderer {
 
     function _generateTextOverlay(
         uint8[256] memory forms
-    ) internal pure returns (string memory) {
+    ) internal pure returns (bytes memory) {
         DynamicBufferLib.DynamicBuffer memory buffer;
 
         bytes memory offset = bytes(Strings.toString(MARGIN_SIZE));
@@ -296,7 +300,9 @@ contract ByteformRenderer {
             }
         }
 
-        return buffer.p("</div></div></foreignObject></g>").s();
+        buffer.p("</div></div></foreignObject></g>");
+
+        return buffer.data;
     }
 
     function _getFontURI() internal view returns (string memory) {

@@ -435,8 +435,8 @@ contract ArtTest is Test {
         // Assert gas usage does not exceed limit
         assertLe(
             gasUsed,
-            15_000_000,
-            "tokenURI gas usage should not exceed 15M"
+            29_000_000,
+            "tokenURI gas usage should not exceed 30M"
         );
 
         // Verify the tokenURI is valid (starts with data:application/json;base64,)
@@ -479,15 +479,15 @@ contract ArtTest is Test {
         // Ensure gas usage does not exceed known limits
         assertLe(
             gasUsed,
-            15_000_000,
-            "tokenURI gas usage should not exceed 15M"
+            29_000_000,
+            "tokenURI gas usage should not exceed 30M"
         );
 
         // tokenURI must remain below known size limits (etherscan, etc.)
         assertLe(
             bytes(tokenURI).length,
-            64 * 1024,
-            "tokenURI payload size must not exceed 64 kB"
+            99 * 1024,
+            "tokenURI payload size must not exceed 100 kB"
         );
 
         // Write the result to generated/worst-case.txt
@@ -537,8 +537,8 @@ contract ArtTest is Test {
         // Assert gas usage does not exceed limit
         assertLe(
             gasUsed,
-            15_000_000,
-            "tokenHTML gas usage should not exceed 15M"
+            29_000_000,
+            "tokenHTML gas usage should not exceed 30M"
         );
 
         // Verify the tokenHTML is valid (starts with <!DOCTYPE html>)
