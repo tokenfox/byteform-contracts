@@ -55,8 +55,9 @@ contract ByteformRenderer {
         address byteContract,
         address formContract
     ) external view returns (string memory) {
-        string memory json = _generateMetadata(byteContract, formContract);
-        string memory base64Json = Base64.encode(bytes(json));
+        string memory base64Json = Base64.encode(
+            _generateMetadata(byteContract, formContract)
+        );
         return string.concat("data:application/json;base64,", base64Json);
     }
 
@@ -87,16 +88,7 @@ contract ByteformRenderer {
         address byteContract,
         address formContract
     ) external view returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Byteform</title>',
-                    "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:transparent}body{display:flex;align-items:center;justify-content:center;user-select:none}svg{max-width:100%;max-height:100%;width:auto;height:auto;cursor:pointer}</style></head><body>",
-                    _generateImage(byteContract, formContract),
-                    "<script>document.body.onclick=()=>{document.querySelector('.text').classList.toggle('hidden');document.querySelector('.traces').classList.toggle('hidden')}</script>",
-                    "</body></html>"
-                )
-            );
+        return string(_generateHtml(byteContract, formContract));
     }
 
     function renderTokenText(
@@ -113,14 +105,31 @@ contract ByteformRenderer {
     function _generateMetadata(
         address byteContract,
         address formContract
-    ) internal view returns (string memory) {
+    ) internal view returns (bytes memory) {
         return
-            string.concat(
+            abi.encodePacked(
                 '{"name":"Byteform","description":"',
                 _generateDescription(byteContract, formContract),
                 '","image":"data:image/svg+xml;base64,',
                 Base64.encode(_generateImage(byteContract, formContract)),
+                '","animation_url":"data:text/html;base64,',
+                Base64.encode(_generateHtml(byteContract, formContract)),
                 '"}'
+            );
+    }
+
+    function _generateHtml(
+        address byteContract,
+        address formContract
+    ) internal view returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '<!DOCTYPE html><html><head><meta charset="UTF-8">',
+                '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Byteform</title>',
+                "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:transparent}body{display:flex;align-items:center;justify-content:center;user-select:none}svg{max-width:100%;max-height:100%;width:auto;height:auto;cursor:pointer}</style></head><body>",
+                _generateImage(byteContract, formContract),
+                "<script>document.body.onclick=()=>{document.querySelector('.text').classList.toggle('hidden');document.querySelector('.traces').classList.toggle('hidden')}</script>",
+                "</body></html>"
             );
     }
 
@@ -140,18 +149,29 @@ contract ByteformRenderer {
         return
             abi.encodePacked(
                 SVG_OPEN,
-                "<!-- ",
-                _getText(forms),
-                " -->",
-                "<style>.hidden{display:none}.ps{stroke:#333333;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round}",
-                '@font-face {font-family:IBMPlexMono;src:url("',
-                _getFontURI(),
-                '") format("woff2");}</style>',
+                "<style>.text,.traces{opacity:1;visibility:visible;transition:opacity 0.5s ease-in-out,visibility 0.5s ease-in-out}.hidden{opacity:0;visibility:hidden;pointer-events:none}.ps{stroke:#333333;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round}",
+                _generateFontFace(),
+                _generateLineStyles(),
+                _generateTextOverlayStyles(),
+                "</style>",
                 _generateCanvas(),
                 _generateLines(),
                 _generateTextOverlay(forms),
                 _generateTraces(forms),
                 SVG_CLOSE
+            );
+    }
+
+    function _generateLineStyles() internal view returns (bytes memory) {
+        return bytes(".lines line{stroke:#e0e0e0;stroke-width:0.5}");
+    }
+
+    function _generateFontFace() internal view returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '@font-face {font-family:Byteform;src:url("',
+                _getFontURI(),
+                '") format("woff2");}'
             );
     }
 
@@ -228,17 +248,33 @@ contract ByteformRenderer {
         return buffer.data;
     }
 
+    function _generateTextOverlayStyles() internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                ".m{width:256px;height:256px}",
+                ".g{box-sizing:border-box;width:256px;height:256px;line-height:16px;",
+                "display:grid;grid-template-columns:repeat(16,16px);grid-template-rows:repeat(16,16px)}",
+                ".g p{margin:0;text-align:center;color:#000;font-family:Byteform,cursive,sans-serif;font-weight:400;font-size:16px;line-height:16px;}"
+            );
+    }
+
+    function _toHtmlEntity(
+        uint8 value
+    ) internal pure returns (bytes memory result) {
+        bytes memory hexChars = "0123456789ABCDEF";
+        result = new bytes(6);
+        result[0] = "&";
+        result[1] = "#";
+        result[2] = "x";
+        result[3] = hexChars[value >> 4];
+        result[4] = hexChars[value & 0xF];
+        result[5] = ";";
+    }
+
     function _generateTextOverlay(
         uint8[256] memory forms
     ) internal pure returns (string memory) {
         DynamicBufferLib.DynamicBuffer memory buffer;
-
-        buffer.p(
-            "<style>.m{width:256px;height:256px}",
-            ".g{box-sizing:border-box;width:256px;height:256px;line-height:16px;",
-            "display:grid;grid-template-columns:repeat(16,16px);grid-template-rows:repeat(16,16px)}",
-            ".g p{margin:0;text-align:center;color:#000;font-family:IBMPlexMono,serif,monospace;font-weight:400;font-size:16px;line-height:16px;}</style>"
-        );
 
         bytes memory offset = bytes(Strings.toString(MARGIN_SIZE));
         buffer.p(
@@ -267,7 +303,7 @@ contract ByteformRenderer {
         return
             string.concat(
                 "data:font/woff2;base64,",
-                IFileStore(FILE_STORE).readFile("IBMPlexMono-Regular.woff2")
+                IFileStore(FILE_STORE).readFile("Byteform.woff2")
             );
     }
 
@@ -371,19 +407,6 @@ contract ByteformRenderer {
         points[4] = int256((symbolValue >> 16) & 0xF);
     }
 
-    function _toHtmlEntity(
-        uint8 value
-    ) internal pure returns (bytes memory result) {
-        bytes memory hexChars = "0123456789ABCDEF";
-        result = new bytes(6);
-        result[0] = "&";
-        result[1] = "#";
-        result[2] = "x";
-        result[3] = hexChars[value >> 4];
-        result[4] = hexChars[value & 0xF];
-        result[5] = ";";
-    }
-
     function _generateCanvas() internal pure returns (string memory) {
         return
             string.concat(
@@ -405,17 +428,15 @@ contract ByteformRenderer {
             Strings.toString(256 + MARGIN_SIZE + CELL_SIZE / 2)
         );
 
-        buffer.p(
-            '<g class="lines hidden"><style>.tr{stroke:#e0e0e0;stroke-width:0.5}</style>'
-        );
+        buffer.p('<g class="lines hidden">');
 
         for (uint256 i = 0; i < 16; ++i) {
             bytes memory pos = bytes(
                 Strings.toString(i * 16 + MARGIN_SIZE + 8)
             );
-            buffer.p('<line class="tr tr-v" x1="', pos, '" y1="', startPos);
+            buffer.p('<line x1="', pos, '" y1="', startPos);
             buffer.p('" x2="', pos, '" y2="', endPos);
-            buffer.p('"/><line class="tr tr-h" x1="', startPos, '" y1="', pos);
+            buffer.p('"/><line x1="', startPos, '" y1="', pos);
             buffer.p('" x2="', endPos, '" y2="', pos, '"/>');
         }
 
