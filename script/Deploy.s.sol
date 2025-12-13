@@ -17,9 +17,6 @@ interface IByteform {
 }
 
 contract DeployScript is Script {
-    address public constant FILE_STORE =
-        0xFe1411d6864592549AdE050215482e4385dFa0FB;
-
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
