@@ -8,7 +8,9 @@ Running build:
 
     forge build
 
-Downloading font file from EthFS:
+## Generating the font
+
+### Download base font file from EthFS
 
 To download the IBMPlexMono-Regular.woff2 font file from EthFS on Ethereum mainnet:
 
@@ -18,3 +20,9 @@ To download the IBMPlexMono-Regular.woff2 font file from EthFS on Ethereum mainn
 
 Make sure you have `RPC_URL_MAINNET` set in your `.env` file or environment variables.
 
+### Generate smaller subset file
+
+    pyftsubset assets/IBMPlexMono-Regular.woff2 \
+        --unicodes=U+0000-007F \
+        --output-file=assets/IBMPlexMono-7Bit-ASCII.woff2 \
+        --flavor=woff2
