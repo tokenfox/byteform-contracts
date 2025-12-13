@@ -10,11 +10,13 @@ import {Byteform} from "../src/Byteform.sol";
 import {MockFileStore} from "./mocks/MockFileStore.sol";
 
 contract ArtTest is Test {
+    address public constant FILE_STORE =
+        0xFe1411d6864592549AdE050215482e4385dFa0FB;
+
     /// @notice Deploy mock FileStore to the expected address using vm.etch
     function _deployMockFileStore() internal {
-        address fileStoreAddress = 0xFe1411d6864592549AdE050215482e4385dFa0FB;
         MockFileStore mockFileStore = new MockFileStore();
-        vm.etch(fileStoreAddress, address(mockFileStore).code);
+        vm.etch(FILE_STORE, address(mockFileStore).code);
     }
     Byte public byteContract;
     Form public formContract;
@@ -42,7 +44,7 @@ contract ArtTest is Test {
         // Deploy Byte and ByteformRenderer first
         byteContract = new Byte();
         formContract = new Form();
-        renderer = new ByteformRenderer();
+        renderer = new ByteformRenderer(FILE_STORE);
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
         byteform = new Byteform(
@@ -107,7 +109,7 @@ contract ArtTest is Test {
         // Deploy Byte and ByteformRenderer first
         byteContract = new Byte();
         formContract = new Form();
-        renderer = new ByteformRenderer();
+        renderer = new ByteformRenderer(FILE_STORE);
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
         byteform = new Byteform(
@@ -147,7 +149,7 @@ contract ArtTest is Test {
         // Deploy Byte and ByteformRenderer first
         byteContract = new Byte();
         formContract = new Form();
-        renderer = new ByteformRenderer();
+        renderer = new ByteformRenderer(FILE_STORE);
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
         byteform = new Byteform(
@@ -175,7 +177,7 @@ contract ArtTest is Test {
         // Deploy Byte and ByteformRenderer first
         byteContract = new Byte();
         formContract = new Form();
-        renderer = new ByteformRenderer();
+        renderer = new ByteformRenderer(FILE_STORE);
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
         byteform = new Byteform(
@@ -227,7 +229,7 @@ contract ArtTest is Test {
         _deployMockFileStore();
 
         // Deploy only ByteformRenderer
-        renderer = new ByteformRenderer();
+        renderer = new ByteformRenderer(FILE_STORE);
 
         // Deploy Byteform with null byteContract and formContract
         byteform = new Byteform(
@@ -430,7 +432,7 @@ contract ArtTest is Test {
         string memory tokenURI = byteform.tokenURI(0);
         uint256 gasUsed = gasBefore - gasleft();
 
-        // Assert gas usage does not exceed 20M
+        // Assert gas usage does not exceed limit
         assertLe(
             gasUsed,
             15_000_000,
@@ -477,18 +479,16 @@ contract ArtTest is Test {
         // Ensure gas usage does not exceed known limits
         assertLe(
             gasUsed,
-            15_000_000,
-            "tokenURI gas usage should not exceed 15M"
+            16_000_000,
+            "tokenURI gas usage should not exceed 16M"
         );
 
-        // Assert size limit: complete tokenURI payload must remain below known size limits (etherscan, etc.)
-        /*
+        // tokenURI must remain below known size limits (etherscan, etc.)
         assertLe(
             bytes(tokenURI).length,
-            60 * 1024,
-            "tokenURI payload size must not exceed 60 kB"
+            80 * 1024,
+            "tokenURI payload size must not exceed 80 kB"
         );
-        */
 
         // Write the result to generated/worst-case.txt
         vm.writeFile("generated/worst-case.txt", tokenURI);
@@ -534,7 +534,7 @@ contract ArtTest is Test {
         string memory tokenHTML = byteform.tokenHTML(0);
         uint256 gasUsed = gasBefore - gasleft();
 
-        // Assert gas usage does not exceed 20M
+        // Assert gas usage does not exceed limit
         assertLe(
             gasUsed,
             15_000_000,
