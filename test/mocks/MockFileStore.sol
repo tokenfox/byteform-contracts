@@ -9,22 +9,14 @@ contract MockFileStore {
     Vm private constant vm =
         Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    string public constant ASSET_PATH = "assets/";
+
     function readFile(
         string memory filename
     ) external view returns (string memory) {
-        if (
-            keccak256(bytes(filename)) ==
-            keccak256(bytes("IBMPlexMono-Regular.woff2"))
-        ) {
-            bytes memory fileData = vm.readFileBinary(
-                "assets/IBMPlexMono-Regular.woff2"
-            );
-            return Base64.encode(fileData);
-        }
-        if (keccak256(bytes(filename)) == keccak256(bytes("Byteform.woff2"))) {
-            bytes memory fileData = vm.readFileBinary("assets/Byteform.woff2");
-            return Base64.encode(fileData);
-        }
-        return "";
+        bytes memory fileData = vm.readFileBinary(
+            string.concat(ASSET_PATH, filename)
+        );
+        return Base64.encode(fileData);
     }
 }

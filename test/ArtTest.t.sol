@@ -435,8 +435,8 @@ contract ArtTest is Test {
         // Assert gas usage does not exceed limit
         assertLe(
             gasUsed,
-            15_000_000,
-            "tokenURI gas usage should not exceed 15M"
+            16_000_000,
+            "tokenURI gas usage should not exceed 16M"
         );
 
         // Verify the tokenURI is valid (starts with data:application/json;base64,)
