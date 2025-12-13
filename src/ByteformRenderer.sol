@@ -55,8 +55,9 @@ contract ByteformRenderer {
         address byteContract,
         address formContract
     ) external view returns (string memory) {
-        string memory json = _generateMetadata(byteContract, formContract);
-        string memory base64Json = Base64.encode(bytes(json));
+        string memory base64Json = Base64.encode(
+            _generateMetadata(byteContract, formContract)
+        );
         return string.concat("data:application/json;base64,", base64Json);
     }
 
@@ -87,16 +88,7 @@ contract ByteformRenderer {
         address byteContract,
         address formContract
     ) external view returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Byteform</title>',
-                    "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:transparent}body{display:flex;align-items:center;justify-content:center;user-select:none}svg{max-width:100%;max-height:100%;width:auto;height:auto;cursor:pointer}</style></head><body>",
-                    _generateImage(byteContract, formContract),
-                    "<script>document.body.onclick=()=>{document.querySelector('.text').classList.toggle('hidden');document.querySelector('.traces').classList.toggle('hidden')}</script>",
-                    "</body></html>"
-                )
-            );
+        return string(_generateHtml(byteContract, formContract));
     }
 
     function renderTokenText(
@@ -113,14 +105,31 @@ contract ByteformRenderer {
     function _generateMetadata(
         address byteContract,
         address formContract
-    ) internal view returns (string memory) {
+    ) internal view returns (bytes memory) {
         return
-            string.concat(
+            abi.encodePacked(
                 '{"name":"Byteform","description":"',
                 _generateDescription(byteContract, formContract),
                 '","image":"data:image/svg+xml;base64,',
                 Base64.encode(_generateImage(byteContract, formContract)),
+                '","animation_url":"data:text/html;base64,',
+                Base64.encode(_generateHtml(byteContract, formContract)),
                 '"}'
+            );
+    }
+
+    function _generateHtml(
+        address byteContract,
+        address formContract
+    ) internal view returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '<!DOCTYPE html><html><head><meta charset="UTF-8">',
+                '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Byteform</title>',
+                "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:transparent}body{display:flex;align-items:center;justify-content:center;user-select:none}svg{max-width:100%;max-height:100%;width:auto;height:auto;cursor:pointer}</style></head><body>",
+                _generateImage(byteContract, formContract),
+                "<script>document.body.onclick=()=>{document.querySelector('.text').classList.toggle('hidden');document.querySelector('.traces').classList.toggle('hidden')}</script>",
+                "</body></html>"
             );
     }
 
@@ -140,18 +149,23 @@ contract ByteformRenderer {
         return
             abi.encodePacked(
                 SVG_OPEN,
-                "<!-- ",
-                _getText(forms),
-                " -->",
                 "<style>.text,.traces{opacity:1;visibility:visible;transition:opacity 0.5s ease-in-out,visibility 0.5s ease-in-out}.hidden{opacity:0;visibility:hidden;pointer-events:none}.ps{stroke:#333333;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round}",
-                '@font-face {font-family:IBMPlexMono;src:url("',
-                _getFontURI(),
-                '") format("woff2");}</style>',
+                _generateFontFace(),
+                "</style>",
                 _generateCanvas(),
                 _generateLines(),
                 _generateTextOverlay(forms),
                 _generateTraces(forms),
                 SVG_CLOSE
+            );
+    }
+
+    function _generateFontFace() internal view returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '@font-face {font-family:Byteform;src:url("',
+                _getFontURI(),
+                '") format("woff2");}'
             );
     }
 
@@ -237,7 +251,7 @@ contract ByteformRenderer {
             "<style>.m{width:256px;height:256px}",
             ".g{box-sizing:border-box;width:256px;height:256px;line-height:16px;",
             "display:grid;grid-template-columns:repeat(16,16px);grid-template-rows:repeat(16,16px)}",
-            ".g p{margin:0;text-align:center;color:#000;font-family:IBMPlexMono,serif,monospace;font-weight:400;font-size:16px;line-height:16px;}</style>"
+            ".g p{margin:0;text-align:center;color:#000;font-family:Byteform,serif,monospace;font-weight:400;font-size:16px;line-height:16px;}</style>"
         );
 
         bytes memory offset = bytes(Strings.toString(MARGIN_SIZE));
