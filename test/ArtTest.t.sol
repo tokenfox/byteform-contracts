@@ -44,7 +44,7 @@ contract ArtTest is Test {
         // Deploy Byte and ByteformRenderer first
         byteContract = new Byte();
         formContract = new Form();
-        renderer = new ByteformRenderer(FILE_STORE);
+        renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
         byteform = new Byteform(
@@ -109,7 +109,7 @@ contract ArtTest is Test {
         // Deploy Byte and ByteformRenderer first
         byteContract = new Byte();
         formContract = new Form();
-        renderer = new ByteformRenderer(FILE_STORE);
+        renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
         byteform = new Byteform(
@@ -149,7 +149,7 @@ contract ArtTest is Test {
         // Deploy Byte and ByteformRenderer first
         byteContract = new Byte();
         formContract = new Form();
-        renderer = new ByteformRenderer(FILE_STORE);
+        renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
         byteform = new Byteform(
@@ -177,7 +177,7 @@ contract ArtTest is Test {
         // Deploy Byte and ByteformRenderer first
         byteContract = new Byte();
         formContract = new Form();
-        renderer = new ByteformRenderer(FILE_STORE);
+        renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects to Byte and ByteformRenderer
         byteform = new Byteform(
@@ -229,7 +229,7 @@ contract ArtTest is Test {
         _deployMockFileStore();
 
         // Deploy only ByteformRenderer
-        renderer = new ByteformRenderer(FILE_STORE);
+        renderer = new ByteformRenderer();
 
         // Deploy Byteform with null byteContract and formContract
         byteform = new Byteform(

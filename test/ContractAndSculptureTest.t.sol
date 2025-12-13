@@ -43,7 +43,7 @@ contract ContractAndSculptureTest is Test {
         formContract = new Form();
 
         // Deploy ByteformRenderer (uses mock FileStore)
-        renderer = new ByteformRenderer(FILE_STORE);
+        renderer = new ByteformRenderer();
 
         // Deploy Byteform that connects everything
         byteform = new Byteform(

@@ -12,11 +12,8 @@ import {console} from "forge-std/console.sol";
 contract ByteformRenderer {
     using DynamicBufferLib for DynamicBufferLib.DynamicBuffer;
 
-    address public immutable FILE_STORE;
-
-    constructor(address fileStore_) {
-        FILE_STORE = fileStore_;
-    }
+    address public constant FILE_STORE =
+        0xFe1411d6864592549AdE050215482e4385dFa0FB;
 
     uint256 private constant MARGIN_SIZE = 16;
     uint256 private constant CELL_SIZE = 16;
@@ -146,7 +143,7 @@ contract ByteformRenderer {
                 "<!-- ",
                 _getText(forms),
                 " -->",
-                "<style>.hidden{display:none}.ps{stroke:#333333;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round}",
+                "<style>.text,.traces{opacity:1;visibility:visible;transition:opacity 0.5s ease-in-out,visibility 0.5s ease-in-out}.hidden{opacity:0;visibility:hidden;pointer-events:none}.ps{stroke:#333333;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round}",
                 '@font-face {font-family:IBMPlexMono;src:url("',
                 _getFontURI(),
                 '") format("woff2");}</style>',
