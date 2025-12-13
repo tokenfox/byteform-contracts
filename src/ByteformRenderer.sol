@@ -12,7 +12,8 @@ import {console} from "forge-std/console.sol";
 contract ByteformRenderer {
     using DynamicBufferLib for DynamicBufferLib.DynamicBuffer;
 
-    address public constant FILE_STORE = 0xFe1411d6864592549AdE050215482e4385dFa0FB;
+    address public constant FILE_STORE =
+        0xFe1411d6864592549AdE050215482e4385dFa0FB;
 
     uint256 private constant MARGIN_SIZE = 16;
     uint256 private constant CELL_SIZE = 16;
@@ -33,7 +34,10 @@ contract ByteformRenderer {
         return new string[](0);
     }
 
-    function getAddresses(address byteContract, address formContract) external view returns (address[] memory) {
+    function getAddresses(
+        address byteContract,
+        address formContract
+    ) external view returns (address[] memory) {
         address[] memory result = new address[](3);
         result[0] = byteContract;
         result[1] = formContract;
@@ -47,80 +51,119 @@ contract ByteformRenderer {
         return string.concat("data:application/json;base64,", base64Json);
     }
 
-    function renderTokenURI(address byteContract, address formContract) external view returns (string memory) {
-        string memory base64Json = Base64.encode(_generateMetadata(byteContract, formContract));
+    function renderTokenURI(
+        address byteContract,
+        address formContract
+    ) external view returns (string memory) {
+        string memory base64Json = Base64.encode(
+            _generateMetadata(byteContract, formContract)
+        );
         return string.concat("data:application/json;base64,", base64Json);
     }
 
-    function renderTokenImageURI(address byteContract, address formContract) external view returns (string memory) {
-        string memory base64Image = Base64.encode(_generateImage(byteContract, formContract, true, true));
+    function renderTokenImageURI(
+        address byteContract,
+        address formContract
+    ) external view returns (string memory) {
+        string memory base64Image = Base64.encode(
+            _generateImage(byteContract, formContract, true, true)
+        );
         return string.concat("data:image/svg+xml;base64,", base64Image);
     }
 
-    function renderTokenImage(address byteContract, address formContract) external view returns (string memory) {
-        return string(
-            abi.encodePacked(
-                '<?xml version="1.0" encoding="UTF-8"?>\n', _generateImage(byteContract, formContract, true, true)
-            )
-        );
+    function renderTokenImage(
+        address byteContract,
+        address formContract
+    ) external view returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<?xml version="1.0" encoding="UTF-8"?>\n',
+                    _generateImage(byteContract, formContract, true, true)
+                )
+            );
     }
 
-    function renderTokenHTML(address byteContract, address formContract) external view returns (string memory) {
+    function renderTokenHTML(
+        address byteContract,
+        address formContract
+    ) external view returns (string memory) {
         return string(_generateHtml(byteContract, formContract));
     }
 
-    function renderTokenText(address byteContract, address formContract) external view returns (string memory) {
-        uint8[256] memory forms = _fetchOwnersAndForms(Byte(byteContract), Form(formContract));
+    function renderTokenText(
+        address byteContract,
+        address formContract
+    ) external view returns (string memory) {
+        uint8[256] memory forms = _fetchOwnersAndForms(
+            Byte(byteContract),
+            Form(formContract)
+        );
         return _getText(forms);
     }
 
-    function _generateMetadata(address byteContract, address formContract) internal view returns (bytes memory) {
-        return abi.encodePacked(
-            '{"name":"Byteform","description":"',
-            _generateDescription(byteContract, formContract),
-            '","image":"data:image/svg+xml;base64,',
-            Base64.encode(_generateImage(byteContract, formContract, false, false)),
-            '","animation_url":"data:text/html;base64,',
-            Base64.encode(_generateHtml(byteContract, formContract)),
-            '"}'
-        );
+    function _generateMetadata(
+        address byteContract,
+        address formContract
+    ) internal view returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '{"name":"Byteform","description":"',
+                _generateDescription(byteContract, formContract),
+                '","image":"data:image/svg+xml;base64,',
+                Base64.encode(
+                    _generateImage(byteContract, formContract, false, false)
+                ),
+                '","animation_url":"data:text/html;base64,',
+                Base64.encode(_generateHtml(byteContract, formContract)),
+                '"}'
+            );
     }
 
-    function _generateHtml(address byteContract, address formContract) internal view returns (bytes memory) {
-        return abi.encodePacked(
-            '<!DOCTYPE html><html><head><meta charset="UTF-8">',
-            '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Byteform</title>',
-            "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:transparent}body{display:flex;align-items:center;justify-content:center;user-select:none}svg{max-width:100%;max-height:100%;width:auto;height:auto;cursor:pointer}</style></head><body>",
-            _generateImage(byteContract, formContract, true, true),
-            "<script>document.body.onclick=()=>{document.querySelector('.text').classList.toggle('hidden');document.querySelector('.traces').classList.toggle('hidden')}</script>",
-            "</body></html>"
-        );
+    function _generateHtml(
+        address byteContract,
+        address formContract
+    ) internal view returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '<!DOCTYPE html><html><head><meta charset="UTF-8">',
+                '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Byteform</title>',
+                "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:transparent}body{display:flex;align-items:center;justify-content:center;user-select:none}svg{max-width:100%;max-height:100%;width:auto;height:auto;cursor:pointer}</style></head><body>",
+                _generateImage(byteContract, formContract, true, true),
+                "<script>document.body.onclick=()=>{document.querySelector('.text').classList.toggle('bf-h');document.querySelector('.traces').classList.toggle('bf-h')}</script>",
+                "</body></html>"
+            );
     }
 
-    function _generateImage(address byteContract, address formContract, bool includeLines, bool includeTextOverlay)
-        internal
-        view
-        returns (bytes memory)
-    {
+    function _generateImage(
+        address byteContract,
+        address formContract,
+        bool includeLines,
+        bool includeTextOverlay
+    ) internal view returns (bytes memory) {
         if (byteContract == address(0) || formContract == address(0)) {
             return abi.encodePacked(SVG_OPEN, _generateCanvas(), SVG_CLOSE);
         }
 
-        uint8[256] memory forms = _fetchOwnersAndForms(Byte(byteContract), Form(formContract));
-
-        return abi.encodePacked(
-            SVG_OPEN,
-            "<style>.text,.traces{opacity:1;visibility:visible;transition:opacity 0.5s ease-in-out,visibility 0.5s ease-in-out}.hidden{opacity:0;visibility:hidden;pointer-events:none}.ps{stroke:#333333;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round}",
-            includeTextOverlay ? _generateFontFace() : bytes(""),
-            includeLines ? _generateLineStyles() : bytes(""),
-            includeTextOverlay ? _generateTextOverlayStyles() : bytes(""),
-            "</style>",
-            _generateCanvas(),
-            includeLines ? _generateLines() : bytes(""),
-            includeTextOverlay ? _generateTextOverlay(forms) : bytes(""),
-            _generateTraces(forms),
-            SVG_CLOSE
+        uint8[256] memory forms = _fetchOwnersAndForms(
+            Byte(byteContract),
+            Form(formContract)
         );
+
+        return
+            abi.encodePacked(
+                SVG_OPEN,
+                "<style>.text,.traces{opacity:1;visibility:visible;transition:opacity 0.5s ease-in-out,visibility 0.5s ease-in-out}.bf-h{opacity:0;visibility:hidden;pointer-events:none}.ps{stroke:#333333;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round}",
+                includeTextOverlay ? _generateFontFace() : bytes(""),
+                includeLines ? _generateLineStyles() : bytes(""),
+                includeTextOverlay ? _generateTextOverlayStyles() : bytes(""),
+                "</style>",
+                _generateCanvas(),
+                includeLines ? _generateLines() : bytes(""),
+                includeTextOverlay ? _generateTextOverlay(forms) : bytes(""),
+                _generateTraces(forms),
+                SVG_CLOSE
+            );
     }
 
     function _generateLineStyles() internal view returns (bytes memory) {
@@ -128,10 +171,18 @@ contract ByteformRenderer {
     }
 
     function _generateFontFace() internal view returns (bytes memory) {
-        return abi.encodePacked('@font-face {font-family:Byteform;src:url("', _getFontURI(), '") format("woff2");}');
+        return
+            abi.encodePacked(
+                '@font-face {font-family:Byteform;src:url("',
+                _getFontURI(),
+                '") format("woff2");}'
+            );
     }
 
-    function _fetchOwnersAndForms(Byte byte_, Form form) internal view returns (uint8[256] memory forms) {
+    function _fetchOwnersAndForms(
+        Byte byte_,
+        Form form
+    ) internal view returns (uint8[256] memory forms) {
         for (uint256 i = 0; i < 256; ++i) {
             address owner = byte_.o(uint8(i));
             if (owner != address(0)) {
@@ -140,7 +191,9 @@ contract ByteformRenderer {
         }
     }
 
-    function _generateTraces(uint8[256] memory forms) internal pure returns (bytes memory) {
+    function _generateTraces(
+        uint8[256] memory forms
+    ) internal pure returns (bytes memory) {
         DynamicBufferLib.DynamicBuffer memory buffer;
         DynamicBufferLib.DynamicBuffer memory pathBuffer;
 
@@ -164,7 +217,9 @@ contract ByteformRenderer {
             uint256 yPos = y * 16 + MARGIN_SIZE;
 
             uint256 symbolValue = _calculateSymbolValue(byteForm);
-            int256[5] memory points = _calculateControlPointsAndCutValue(symbolValue);
+            int256[5] memory points = _calculateControlPointsAndCutValue(
+                symbolValue
+            );
             int256 endX = points[4];
 
             if (endX < 2 || (endX > 5 && endX < 9) || endX > 13) {
@@ -198,15 +253,18 @@ contract ByteformRenderer {
     }
 
     function _generateTextOverlayStyles() internal pure returns (bytes memory) {
-        return abi.encodePacked(
-            ".m{width:256px;height:256px}",
-            ".g{box-sizing:border-box;width:256px;height:256px;line-height:16px;",
-            "display:grid;grid-template-columns:repeat(16,16px);grid-template-rows:repeat(16,16px)}",
-            ".g p{margin:0;text-align:center;color:#000;font-family:Byteform,cursive,sans-serif;font-weight:400;font-size:16px;line-height:16px;}"
-        );
+        return
+            abi.encodePacked(
+                ".m{width:256px;height:256px}",
+                ".g{box-sizing:border-box;width:256px;height:256px;line-height:16px;",
+                "display:grid;grid-template-columns:repeat(16,16px);grid-template-rows:repeat(16,16px)}",
+                ".g p{margin:0;text-align:center;color:#000;font-family:Byteform,cursive,sans-serif;font-weight:400;font-size:16px;line-height:16px;}"
+            );
     }
 
-    function _toHtmlEntity(uint8 value) internal pure returns (bytes memory result) {
+    function _toHtmlEntity(
+        uint8 value
+    ) internal pure returns (bytes memory result) {
         bytes memory hexChars = "0123456789ABCDEF";
         result = new bytes(6);
         result[0] = "&";
@@ -217,12 +275,21 @@ contract ByteformRenderer {
         result[5] = ";";
     }
 
-    function _generateTextOverlay(uint8[256] memory forms) internal pure returns (bytes memory) {
+    function _generateTextOverlay(
+        uint8[256] memory forms
+    ) internal pure returns (bytes memory) {
         DynamicBufferLib.DynamicBuffer memory buffer;
 
         bytes memory offset = bytes(Strings.toString(MARGIN_SIZE));
-        buffer.p('<g class="text hidden"><foreignObject x="', offset, '" y="', offset);
-        buffer.p('" width="256" height="256"><div class="m" xmlns="http://www.w3.org/1999/xhtml"><div class="g">');
+        buffer.p(
+            '<g class="text bf-h"><foreignObject x="',
+            offset,
+            '" y="',
+            offset
+        );
+        buffer.p(
+            '" width="256" height="256"><div class="m" xmlns="http://www.w3.org/1999/xhtml"><div class="g">'
+        );
 
         for (uint256 value = 0; value < 256; ++value) {
             uint8 byteForm = forms[value];
@@ -239,10 +306,16 @@ contract ByteformRenderer {
     }
 
     function _getFontURI() internal view returns (string memory) {
-        return string.concat("data:font/woff2;base64,", IFileStore(FILE_STORE).readFile("Byteform.woff2"));
+        return
+            string.concat(
+                "data:font/woff2;base64,",
+                IFileStore(FILE_STORE).readFile("Byteform-v0.1.woff2")
+            );
     }
 
-    function _getText(uint8[256] memory forms) internal pure returns (string memory result) {
+    function _getText(
+        uint8[256] memory forms
+    ) internal pure returns (string memory result) {
         for (uint256 value = 0; value < 256; ++value) {
             uint8 byteForm = forms[value];
             if (_isPrintable(byteForm)) {
@@ -255,62 +328,74 @@ contract ByteformRenderer {
         return result;
     }
 
-    function _generateDescription(address byteContract, address formContract) internal pure returns (string memory) {
-        return string.concat(
-            "BYTE",
-            NL,
-            Strings.toHexString(uint256(uint160(byteContract))),
-            NL,
-            NL,
-            "FORM",
-            NL,
-            Strings.toHexString(uint256(uint160(formContract)))
-        );
+    function _generateDescription(
+        address byteContract,
+        address formContract
+    ) internal pure returns (string memory) {
+        return
+            string.concat(
+                "BYTE",
+                NL,
+                Strings.toHexString(uint256(uint160(byteContract))),
+                NL,
+                NL,
+                "FORM",
+                NL,
+                Strings.toHexString(uint256(uint160(formContract)))
+            );
     }
 
-    function _renderFirstSegment(uint256 xPos, uint256 yPos, int256[5] memory points, int256 endX)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function _renderFirstSegment(
+        uint256 xPos,
+        uint256 yPos,
+        int256[5] memory points,
+        int256 endX
+    ) internal pure returns (bytes memory) {
         string memory yMid = Strings.toString(yPos + 8);
-        return abi.encodePacked(
-            '<path class="ps" d="M',
-            Strings.toString(xPos),
-            ",",
-            yMid,
-            " C ",
-            Strings.toStringSigned(int256(xPos) + points[0]),
-            ",",
-            Strings.toStringSigned(int256(yPos) + points[1]),
-            " ",
-            Strings.toStringSigned(int256(xPos) + points[2]),
-            ",",
-            Strings.toStringSigned(int256(yPos) + points[3]),
-            " ",
-            Strings.toStringSigned(int256(xPos) + endX),
-            ",",
-            yMid
-        );
+        return
+            abi.encodePacked(
+                '<path class="ps" d="M',
+                Strings.toString(xPos),
+                ",",
+                yMid,
+                " C ",
+                Strings.toStringSigned(int256(xPos) + points[0]),
+                ",",
+                Strings.toStringSigned(int256(yPos) + points[1]),
+                " ",
+                Strings.toStringSigned(int256(xPos) + points[2]),
+                ",",
+                Strings.toStringSigned(int256(yPos) + points[3]),
+                " ",
+                Strings.toStringSigned(int256(xPos) + endX),
+                ",",
+                yMid
+            );
     }
 
-    function _renderContinuationSegment(int256[5] memory points, int256 endX) internal pure returns (bytes memory) {
-        return abi.encodePacked(
-            " c ",
-            Strings.toStringSigned(points[0]),
-            ",",
-            Strings.toStringSigned(points[1] - 8),
-            " ",
-            Strings.toStringSigned(points[2]),
-            ",",
-            Strings.toStringSigned(points[3] - 8),
-            " ",
-            Strings.toStringSigned(endX),
-            ",0"
-        );
+    function _renderContinuationSegment(
+        int256[5] memory points,
+        int256 endX
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                " c ",
+                Strings.toStringSigned(points[0]),
+                ",",
+                Strings.toStringSigned(points[1] - 8),
+                " ",
+                Strings.toStringSigned(points[2]),
+                ",",
+                Strings.toStringSigned(points[3] - 8),
+                " ",
+                Strings.toStringSigned(endX),
+                ",0"
+            );
     }
 
-    function _calculateSymbolValue(uint8 byteForm) internal pure returns (uint256) {
+    function _calculateSymbolValue(
+        uint8 byteForm
+    ) internal pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(byteForm))) % 1048576;
     }
 
@@ -318,7 +403,9 @@ contract ByteformRenderer {
         return byteForm >= 32 && byteForm <= 126;
     }
 
-    function _calculateControlPointsAndCutValue(uint256 symbolValue) internal pure returns (int256[5] memory points) {
+    function _calculateControlPointsAndCutValue(
+        uint256 symbolValue
+    ) internal pure returns (int256[5] memory points) {
         points[0] = int256(symbolValue & 0xF);
         points[1] = int256((symbolValue >> 4) & 0xF);
         points[2] = int256((symbolValue >> 12) & 0xF);
@@ -327,25 +414,32 @@ contract ByteformRenderer {
     }
 
     function _generateCanvas() internal pure returns (string memory) {
-        return string.concat(
-            '<rect x="0" y="0" width="',
-            Strings.toString(FULL_SIZE),
-            '" height="',
-            Strings.toString(FULL_SIZE),
-            '" fill="#ffffff"/>'
-        );
+        return
+            string.concat(
+                '<rect x="0" y="0" width="',
+                Strings.toString(FULL_SIZE),
+                '" height="',
+                Strings.toString(FULL_SIZE),
+                '" fill="#ffffff"/>'
+            );
     }
 
     function _generateLines() internal pure returns (bytes memory) {
         DynamicBufferLib.DynamicBuffer memory buffer;
 
-        bytes memory startPos = bytes(Strings.toString(MARGIN_SIZE - CELL_SIZE / 2));
-        bytes memory endPos = bytes(Strings.toString(256 + MARGIN_SIZE + CELL_SIZE / 2));
+        bytes memory startPos = bytes(
+            Strings.toString(MARGIN_SIZE - CELL_SIZE / 2)
+        );
+        bytes memory endPos = bytes(
+            Strings.toString(256 + MARGIN_SIZE + CELL_SIZE / 2)
+        );
 
-        buffer.p('<g class="lines hidden">');
+        buffer.p('<g class="lines bf-h">');
 
         for (uint256 i = 0; i < 16; ++i) {
-            bytes memory pos = bytes(Strings.toString(i * 16 + MARGIN_SIZE + 8));
+            bytes memory pos = bytes(
+                Strings.toString(i * 16 + MARGIN_SIZE + 8)
+            );
             buffer.p('<line x1="', pos, '" y1="', startPos);
             buffer.p('" x2="', pos, '" y2="', endPos);
             buffer.p('"/><line x1="', startPos, '" y1="', pos);
