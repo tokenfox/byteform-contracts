@@ -26,12 +26,7 @@ contract DeployScript is Script {
 
         // Deploy Byteform
         address deployer = vm.addr(deployerPrivateKey);
-        Byteform byteform = new Byteform(
-            deployer,
-            address(0),
-            address(0),
-            address(renderer)
-        );
+        Byteform byteform = new Byteform(deployer, address(0), address(0), address(renderer));
 
         // Create byte
         Byte byteContract = new Byte();
