@@ -25,7 +25,7 @@ contract DeployScript is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // Deploy ByteformRenderer
-        ByteformRenderer renderer = new ByteformRenderer(FILE_STORE);
+        ByteformRenderer renderer = new ByteformRenderer();
 
         // Deploy Byteform
         address deployer = vm.addr(deployerPrivateKey);
@@ -49,7 +49,7 @@ contract DeployScript is Script {
 
         /*
         // Optional: Upgrade renderer
-        ByteformRenderer rendererV2 = new ByteformRenderer(FILE_STORE);
+        ByteformRenderer rendererV2 = new ByteformRenderer();
         byteformInterface.setRenderer(address(rendererV2));
 
         // Optional: freeze byte and form
