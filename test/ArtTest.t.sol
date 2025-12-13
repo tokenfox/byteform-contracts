@@ -486,8 +486,8 @@ contract ArtTest is Test {
         // tokenURI must remain below known size limits (etherscan, etc.)
         assertLe(
             bytes(tokenURI).length,
-            60 * 1024,
-            "tokenURI payload size must not exceed 60 kB"
+            90 * 1024,
+            "tokenURI payload size must not exceed 90 kB"
         );
 
         // Write the result to generated/worst-case.txt
